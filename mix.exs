@@ -25,7 +25,8 @@ defmodule UeberauthEveSso.MixProject do
   defp deps do
     [
       {:oauth2, "~> 0.9.4"},
-      {:ueberauth, "~> 0.5.0"}
+      {:ueberauth, "~> 0.5.0"},
+      {:jason, "~> 1.1"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
