@@ -21,6 +21,8 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     token_url: "https://login.eveonline.com/v2/oauth/token"
   ]
 
+  @subject_detail_base_url "/v4/characters/"
+
   @doc """
   Construct a client for requests to ESI
 
@@ -46,12 +48,20 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     OAuth2.Client.new(client_opts)
   end
 
+  @doc """
+  Provides the authorize url for the request phase of Ueberauth.
+  This will usually not have to be called directly.
+  """
   def authorize_url!(params \\ [], opts \\ []) do
     opts
     |> client
     |> OAuth2.Client.authorize_url!(params)
   end
 
+  @doc """
+  Perform an authorized GET request to `url` using the `token`.
+  Url can be either relative to the `site` or absolute.
+  """
   def get(token, url, headers \\ [], opts \\ []) do
     [token: token]
     |> client()
@@ -59,12 +69,28 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     |> OAuth2.Client.get(url, headers, opts)
   end
 
+  @doc """
+  Verify a token with ESI and prime the Auth cache. Will return token owner details
+  """
   def verify(token) do
-    token
-    |> __MODULE__.get('/verify')
+    result = __MODULE__.get(token, "/verify")
+
+    case result do
+      %OAuth2.Response{body: body, headers: _headers, status_code: 200} -> body
+      _ -> {:error, {:verification_error, result}}
+    end
   end
 
-  def get_token!(params \\[], options \\ []) do
+  def subject(token, id) do
+    result = __MODULE__.get(token, "#{@subject_detail_base_url}#{id}")
+
+    case result do
+      %OAuth2.Response{body: body, headers: _headers, status_code: 200} -> body
+      _ -> {:error, {:verification_error, result}}
+    end
+  end
+
+  def get_token!(params \\ [], options \\ []) do
     headers = Keyword.get(options, :headers, [])
     options = Keyword.get(options, :options, [])
     client_options = Keyword.get(options, :client_options, [])
@@ -87,12 +113,13 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
 
   defp check_config_key_exists(config, key) when is_list(config) do
     unless Keyword.has_key?(config, key) do
-      raise "#{inspect (key)} missing from config :ueberauth, Ueberauth.Strategy.EVESSO"
+      raise "#{inspect(key)} missing from config :ueberauth, Ueberauth.Strategy.EVESSO"
     end
+
     config
   end
+
   defp check_config_key_exists(_, _) do
     raise "Config :ueberauth, Ueberauth.Strategy.EVESSO is not a keyword list, as expected"
   end
-
 end

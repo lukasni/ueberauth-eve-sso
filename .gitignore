@@ -25,3 +25,5 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 ueberauth_eve_sso-*.tar
 
+# confidental environment variables set in .env.sh
+.env.sh
