@@ -76,7 +76,7 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     result = __MODULE__.get(token, "/verify")
 
     case result do
-      %OAuth2.Response{body: body, headers: _headers, status_code: 200} -> body
+      {:ok, %OAuth2.Response{body: body, headers: _headers, status_code: 200}} -> {:ok, body}
       _ -> {:error, {:verification_error, result}}
     end
   end
@@ -85,7 +85,7 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     result = __MODULE__.get(token, "#{@subject_detail_base_url}#{id}")
 
     case result do
-      %OAuth2.Response{body: body, headers: _headers, status_code: 200} -> body
+      {:ok, %OAuth2.Response{body: body, headers: _headers, status_code: 200}} -> {:ok, body}
       _ -> {:error, {:verification_error, result}}
     end
   end
