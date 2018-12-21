@@ -21,8 +21,6 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     token_url: "https://login.eveonline.com/v2/oauth/token"
   ]
 
-  @subject_detail_base_url "/v4/characters/"
-
   @doc """
   Construct a client for requests to ESI
 
@@ -82,11 +80,13 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
   end
 
   def subject(token, id) do
-    result = __MODULE__.get(token, "#{@subject_detail_base_url}#{id}")
-
-    case result do
-      {:ok, %OAuth2.Response{body: body, headers: _headers, status_code: 200}} -> {:ok, body}
-      _ -> {:error, {:verification_error, result}}
+    with {:ok, %OAuth2.Response{body: char_body, headers: _headers, status_code: 200}} <-
+           __MODULE__.get(token, "/v4/characters/#{id}"),
+         {:ok, %OAuth2.Response{body: pict_body, headers: _headers, status_code: 200}} <-
+           __MODULE__.get(token, "/v2/characters/#{id}/portrait/") do
+      {:ok, Map.merge(char_body, %{"portrait" => pict_body})}
+    else
+      err -> {:error, err}
     end
   end
 

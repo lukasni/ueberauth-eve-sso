@@ -95,10 +95,12 @@ defmodule Ueberauth.Strategy.EVESSO do
     %{verify: user, char: character} = conn.private.sso_user
 
     %Info{
-      nickname: user["CharacterID"],
       name: user["CharacterName"],
-      email: user["CharacterOwnerHash"],
-      description: character["description"]
+      description: character["description"],
+      urls: %{
+        portrait: character["portrait"],
+        avatar_url: character["portrait"]["px128x128"]
+      }
     }
   end
 
@@ -121,7 +123,7 @@ defmodule Ueberauth.Strategy.EVESSO do
   end
 
   defp fetch_uid(field, conn) do
-    conn.private.sso_user[field]
+    conn.private.sso_user.verify[field] || conn.private.sso_user.char[field]
   end
 
   defp fetch_user(conn, token) do
