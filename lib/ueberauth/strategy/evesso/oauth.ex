@@ -79,6 +79,9 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     end
   end
 
+  @doc """
+  Retrieve character details and portrait urls for the owner of a token
+  """
   def subject(token, id) do
     with {:ok, %OAuth2.Response{body: char_body, headers: _headers, status_code: 200}} <-
            __MODULE__.get(token, "/v4/characters/#{id}"),
@@ -95,6 +98,18 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     options = Keyword.get(options, :options, [])
     client_options = Keyword.get(options, :client_options, [])
     client = OAuth2.Client.get_token!(client(client_options), params, headers, options)
+    client.token
+  end
+
+  @doc """
+  Get a new access token using a `refresh_token`
+  """
+  def refresh_token!(refresh_token) do
+    client = client(strategy: OAuth2.Strategy.Refresh)
+    |> put_param("refresh_token", refresh_token)
+    |> put_header("Accept", "application/json")
+    |> put_header("Host", "login.eveonline.com")
+    |> OAuth2.Client.get_token!
     client.token
   end
 
