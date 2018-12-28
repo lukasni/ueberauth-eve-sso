@@ -102,7 +102,7 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
   end
 
   @doc """
-  Get a new access token using a `refresh_token`
+  Get a new access token using a `refresh_token`. Will raise an error if the refresh fails
   """
   def refresh_token!(refresh_token) do
     client = client(strategy: OAuth2.Strategy.Refresh)
@@ -110,7 +110,17 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
     |> put_header("Accept", "application/json")
     |> put_header("Host", "login.eveonline.com")
     |> OAuth2.Client.get_token!
-    client.token
+  end
+
+  @doc """
+  Get a new access token using a `refresh_token`
+  """
+  def refresh_token(refresh_token) do
+    client = client(strategy: OAuth2.Strategy.Refresh)
+    |> put_param("refresh_token", refresh_token)
+    |> put_header("Accept", "application/json")
+    |> put_header("Host", "login.eveonline.com")
+    |> OAuth2.Client.get_token
   end
 
   # Strategy callbacks
