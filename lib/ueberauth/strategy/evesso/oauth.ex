@@ -87,7 +87,7 @@ defmodule Ueberauth.Strategy.EVESSO.OAuth do
            __MODULE__.get(token, "/v4/characters/#{id}"),
          {:ok, %OAuth2.Response{body: pict_body, headers: _headers, status_code: 200}} <-
            __MODULE__.get(token, "/v2/characters/#{id}/portrait/") do
-      {:ok, Map.merge(char_body, %{"portrait" => pict_body})}
+      {:ok, Map.merge(char_body, %{"portrait" => pict_body, "character_id" => id})}
     else
       err -> {:error, err}
     end
